@@ -23,4 +23,4 @@ This started out as a simple URLDecoder tool, in order to allow security personn
 
 • ZLip
 
-Usage: decodesource "source string/file" decodemethod <number for urldecode iterations> -save <outfile> -help
+Usage: decodesource "source string/file" decodemethod # -save <outfile> -help
