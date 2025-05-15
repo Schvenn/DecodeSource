@@ -1,6 +1,6 @@
 function decodesource ($encodedsource, [string]$mode = 'urldecode', [int]$number, [switch]$save, $outfile, [switch]$help) {# Decode a file or string to screen based on mode, with optional file save.
 
-function usage {Write-Host -f cyan "`nUsage: decodesource `"source string/file`" <auto/base64/deflate/gzip/hex/htmlentity/reverse/unicode/urldecode/quotedprintable/zlib> <save>`n"; return}
+function usage {Write-Host -f cyan "`nUsage: decodesource `"source string/file`" <auto/base64/deflate/gzip/hex/htmlentity/reverse/unicode/urldecode/quotedprintable/zlib> <number for urldecode iterations> -save <outfile> -help`n"; return}
 
 if ($help) {function scripthelp ($section) {# (Internal) Generate the help sections from the comments section of the script.
 ""; Write-Host -ForegroundColor Yellow ("-" * 100); $pattern = "(?ims)^## ($section.*?)(##|\z)"; $match = [regex]::Match($scripthelp, $pattern); $lines = $match.Groups[1].Value.TrimEnd() -split "`r?`n", 2; Write-Host $lines[0] -ForegroundColor Yellow; Write-Host -ForegroundColor Yellow ("-" * 100)
@@ -120,7 +120,7 @@ This started out as a simple URLDecoder tool, in order to allow security personn
 • URLDecode *
 • ZLip
 
-Usage: decodesource "source string/file" decodemethod -save <outfile> -help
+Usage: decodesource "source string/file" decodemethod <number for urldecode iterations> -save <outfile> -help
 
 One important note is that I did not use the traditional method of URLDecoding, which is to use the native System Web HttpUtility, because this is readily abused by threat actors and I do not want this utility getting mistaken for anything other than legitimate software. Therefore, I used the safer UnescapeDataString method and applied some Regex logic around the plus sign "+" to " " space character conversions that is so easily handled by the web utility, but not handled as gracefully by this alternate method.
 
