@@ -2,13 +2,31 @@ function decodesource ($encodedsource, [string]$mode = 'urldecode', [int]$number
 
 function usage {Write-Host -f cyan "`nUsage: decodesource `"source string/file`" <auto/base64/deflate/gzip/hex/htmlentity/reverse/unicode/urldecode/quotedprintable/zlib> <number for urldecode iterations> -save <outfile> -help`n"; return}
 
-if ($help) {function scripthelp ($section) {# (Internal) Generate the help sections from the comments section of the script.
-""; Write-Host -ForegroundColor Yellow ("-" * 100); $pattern = "(?ims)^## ($section.*?)(##|\z)"; $match = [regex]::Match($scripthelp, $pattern); $lines = $match.Groups[1].Value.TrimEnd() -split "`r?`n", 2; Write-Host $lines[0] -ForegroundColor Yellow; Write-Host -ForegroundColor Yellow ("-" * 100)
-if ($lines.Count -gt 1) {$lines[1] | Out-String | Out-Host -Paging}; Write-Host -ForegroundColor Yellow ("-" * 100)}
+if ($help) {# Inline help.
+function wordwrap ($field, [int]$maximumlinelength = 65) {# Modify fields sent to it with proper word wrapping.
+if ($null -eq $field -or $field.Length -eq 0) {return $null}
+$breakchars = ',.;?!\/ '; $wrapped = @()
+
+foreach ($line in $field -split "`n") {if ($line.Trim().Length -eq 0) {$wrapped += ''; continue}
+$remaining = $line.Trim()
+while ($remaining.Length -gt $maximumlinelength) {$segment = $remaining.Substring(0, $maximumlinelength); $breakIndex = -1
+
+foreach ($char in $breakchars.ToCharArray()) {$index = $segment.LastIndexOf($char)
+if ($index -gt $breakIndex) {$breakChar = $char; $breakIndex = $index}}
+if ($breakIndex -lt 0) {$breakIndex = $maximumlinelength - 1; $breakChar = ''}
+$chunk = $segment.Substring(0, $breakIndex + 1).TrimEnd(); $wrapped += $chunk; $remaining = $remaining.Substring($breakIndex + 1).TrimStart()}
+
+if ($remaining.Length -gt 0) {$wrapped += $remaining}}
+return ($wrapped -join "`n")}
+
+function scripthelp ($section) {# (Internal) Generate the help sections from the comments section of the script.
+""; Write-Host -f yellow ("-" * 100); $pattern = "(?ims)^## ($section.*?)(##|\z)"; $match = [regex]::Match($scripthelp, $pattern); $lines = $match.Groups[1].Value.TrimEnd() -split "`r?`n", 2; Write-Host $lines[0] -f yellow; Write-Host -f yellow ("-" * 100)
+if ($lines.Count -gt 1) {wordwrap $lines[1] 100| Out-String | Out-Host -Paging}; Write-Host -f yellow ("-" * 100)}
 $scripthelp = Get-Content -Raw -Path $PSCommandPath; $sections = [regex]::Matches($scripthelp, "(?im)^## (.+?)(?=\r?\n)")
-if ($sections.Count -eq 1) {cls; Write-Host "$([System.IO.Path]::GetFileNameWithoutExtension($PSCommandPath)) Help:" -ForegroundColor Cyan; scripthelp $sections[0].Groups[1].Value; ""; return}
+if ($sections.Count -eq 1) {cls; Write-Host "$([System.IO.Path]::GetFileNameWithoutExtension($PSCommandPath)) Help:" -f cyan; scripthelp $sections[0].Groups[1].Value; ""; return}
+
 $selection = $null
-do {cls; Write-Host "$([System.IO.Path]::GetFileNameWithoutExtension($PSCommandPath)) Help Sections:`n" -ForegroundColor Cyan; for ($i = 0; $i -lt $sections.Count; $i++) {
+do {cls; Write-Host "$([System.IO.Path]::GetFileNameWithoutExtension($PSCommandPath)) Help Sections:`n" -f cyan; for ($i = 0; $i -lt $sections.Count; $i++) {
 "{0}: {1}" -f ($i + 1), $sections[$i].Groups[1].Value}
 if ($selection) {scripthelp $sections[$selection - 1].Groups[1].Value}
 $input = Read-Host "`nEnter a section number to view"
@@ -96,13 +114,13 @@ switch ($mode.ToLower()) {
 default {usage; return}}
 
 # Output.
-Write-Host -ForegroundColor Cyan "`n$source"
+Write-Host -f cyan "`n$source"
 # File saving if chosen.
-if (($save) -and (Test-Path $encodedsource) -and -not $outfile) {$baseName = [System.IO.Path]::GetFileNameWithoutExtension($source); $extension = [System.IO.Path]::GetExtension($source); $newFileName = "$baseName - decoded$extension"; Set-Content $newFileName $decodedString; Write-Host -ForegroundColor Cyan "Output saved to: $newFileName"}
+if (($save) -and (Test-Path $encodedsource) -and -not $outfile) {$baseName = [System.IO.Path]::GetFileNameWithoutExtension($source); $extension = [System.IO.Path]::GetExtension($source); $newFileName = "$baseName - decoded$extension"; Set-Content $newFileName $decodedString; Write-Host -f cyan "Output saved to: $newFileName"}
 # Custom destination file save.
-elseif (($save) -and (Test-Path $encodedsource) -and $outfile) {Set-Content $outfile $decodedString; Write-Host -ForegroundColor Cyan "Output saved to: $outfile"}
+elseif (($save) -and (Test-Path $encodedsource) -and $outfile) {Set-Content $outfile $decodedString; Write-Host -f cyan "Output saved to: $outfile"}
 # Output to screen.
-Write-Host -ForegroundColor Yellow ("-" * 100); Write-Host "$fileContent"; Write-Host -ForegroundColor Yellow ("-" * 100); Write-Host "$decodedString"; Write-Host -ForegroundColor Yellow ("-" * 100); ""}
+Write-Host -f yellow ("-" * 100); Write-Host "$fileContent"; Write-Host -f yellow ("-" * 100); Write-Host "$decodedString"; Write-Host -f yellow ("-" * 100); ""}
 
 <#
 ## Overview
