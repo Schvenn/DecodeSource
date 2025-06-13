@@ -122,6 +122,8 @@ elseif (($save) -and (Test-Path $encodedsource) -and $outfile) {Set-Content $out
 # Output to screen.
 Write-Host -f yellow ("-" * 100); Write-Host "$fileContent"; Write-Host -f yellow ("-" * 100); Write-Host "$decodedString"; Write-Host -f yellow ("-" * 100); ""}
 
+Export-ModuleMember -Function decodesource
+
 <#
 ## Overview
 
