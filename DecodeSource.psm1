@@ -138,7 +138,7 @@ This started out as a simple URLDecoder tool, in order to allow security personn
 • Reverse
 • Unicode
 • URLDecode *
-• ZLip
+• ZLib
 
 Usage: decodesource "source string/file" decodemethod <number for urldecode iterations> -save <outfile> -help
 
