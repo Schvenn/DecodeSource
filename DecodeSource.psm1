@@ -1,11 +1,15 @@
 function decodesource ($encodedsource, [string]$mode = 'urldecode', [int]$number, [switch]$save, $outfile, [switch]$help) {# Decode a file or string to screen based on mode, with optional file save.
 
-function usage {Write-Host -f cyan "`nUsage: decodesource `"source string/file`" <auto/base64/deflate/gzip/hex/htmlentity/reverse/unicode/urldecode/quotedprintable/zlib> <number for urldecode iterations> -save <outfile> -help`n"; return}
+function usage {Write-Host -f cyan "`nUsage: decodesource `"source string/file`" <auto/base64/deflate/gzip/hex/htmlentity/reverse/unicode/urldecode/quotedprintable/'regex','search','log','artifact','viewer','gzip','forensics','PowerShell','find','security','SOC','cybersecurity'> <number for urldecode iterations> -save <outfile> -help`n"; return}
 
 if ($help) {# Inline help.
-function wordwrap ($field, [int]$maximumlinelength = 65) {# Modify fields sent to it with proper word wrapping.
-if ($null -eq $field -or $field.Length -eq 0) {return $null}
+# Modify fields sent to it with proper word wrapping.
+function wordwrap ($field, $maximumlinelength) {if ($null -eq $field -or $field.Length -eq 0) {return $null}
 $breakchars = ',.;?!\/ '; $wrapped = @()
+
+if (-not $maximumlinelength) {[int]$maximumlinelength = (100, $Host.UI.RawUI.WindowSize.Width | Measure-Object -Maximum).Maximum}
+if ($maximumlinelength) {if ($maximumlinelength -lt 60) {[int]$maximumlinelength = 60}
+if ($maximumlinelength -gt $Host.UI.RawUI.BufferSize.Width) {[int]$maximumlinelength = $Host.UI.RawUI.BufferSize.Width}}
 
 foreach ($line in $field -split "`n") {if ($line.Trim().Length -eq 0) {$wrapped += ''; continue}
 $remaining = $line.Trim()
@@ -72,12 +76,12 @@ return $null}
 function Base64Decode {param([string]$s); try {$bytes = [Convert]::FromBase64String($s); return [System.Text.Encoding]::UTF8.GetString($bytes)} catch {Write-Host -f red "`nBase64 decode error: $_.`n"; return $s}}
 
 function DeflateDecode {param([string]$s); $bytes = [System.Convert]::FromBase64String($s); if ($bytes.Length -ge 2) {$b0 = $bytes[0]; $b1 = $bytes[1]
-if ($b0 -eq 0x78 -and ($b1 -eq 0x01 -or $b1 -eq 0x9C -or $b1 -eq 0xDA -or $b1 -eq 0x5E -or $b1 -eq 0xBB)) {Write-Host -f cyan "`nDetected zlib header, using zlib decode."; return Decode-Zlib -Bytes $bytes}}
-Write-Host -f cyan "`nNo zlib header detected, using raw deflate decode."; return Decode-DeflateRaw -Bytes $bytes}
+if ($b0 -eq 0x78 -and ($b1 -eq 0x01 -or $b1 -eq 0x9C -or $b1 -eq 0xDA -or $b1 -eq 0x5E -or $b1 -eq 0xBB)) {Write-Host -f cyan "`nDetected zlib header, using zlib decode."; return DecodeZlib -Bytes $bytes}}
+Write-Host -f cyan "`nNo zlib header detected, using raw deflate decode."; return DecodeDeflateRaw -Bytes $bytes}
 
-function Decode-Zlib {param([byte[]]$Bytes); $deflateBytes = $Bytes[2..($Bytes.Length - 1)]; $ms = New-Object IO.MemoryStream(, $deflateBytes); $ds = New-Object IO.Compression.DeflateStream($ms, [IO.Compression.CompressionMode]::Decompress); $sr = New-Object IO.StreamReader($ds); try {return $sr.ReadToEnd()} catch {Write-Host -f red "`nZlib decode failed: $_.`n"; return $null} finally {$sr.Close(); $ds.Close(); $ms.Close()}}
+function DecodeZlib {param([byte[]]$Bytes); $deflateBytes = $Bytes[2..($Bytes.Length - 1)]; $ms = New-Object IO.MemoryStream(, $deflateBytes); $ds = New-Object IO.Compression.DeflateStream($ms, [IO.Compression.CompressionMode]::Decompress); $sr = New-Object IO.StreamReader($ds); try {return $sr.ReadToEnd()} catch {Write-Host -f red "`nZlib decode failed: $_.`n"; return $null} finally {$sr.Close(); $ds.Close(); $ms.Close()}}
 
-function Decode-DeflateRaw {param([byte[]]$Bytes); try {$ms = New-Object IO.MemoryStream(, $Bytes); $ds = New-Object IO.Compression.DeflateStream($ms, [IO.Compression.CompressionMode]::Decompress); $sr = New-Object IO.StreamReader($ds); $result = $sr.ReadToEnd(); $sr.Close(); $ds.Close(); $ms.Close(); return $result} catch {Write-Host -f red "`nRaw deflate decode error: $_.`n"; return ""}}
+function DecodeDeflateRaw {param([byte[]]$Bytes); try {$ms = New-Object IO.MemoryStream(, $Bytes); $ds = New-Object IO.Compression.DeflateStream($ms, [IO.Compression.CompressionMode]::Decompress); $sr = New-Object IO.StreamReader($ds); $result = $sr.ReadToEnd(); $sr.Close(); $ds.Close(); $ms.Close(); return $result} catch {Write-Host -f red "`nRaw deflate decode error: $_.`n"; return ""}}
 
 function GZipDecode {param([string]$s); try {$bytes = [System.Convert]::FromBase64String($s); $ms = New-Object System.IO.MemoryStream(,$bytes); $gzip = New-Object System.IO.Compression.GzipStream($ms, [IO.Compression.CompressionMode]::Decompress); $reader = New-Object System.IO.StreamReader($gzip, [System.Text.Encoding]::UTF8); return $reader.ReadToEnd()} catch {Write-Host -f red "`nGZipDecode failed: $_.`n"; return $null}}
 
@@ -176,4 +180,26 @@ decodesource "Hello%20World%21" auto
 decodesource "eJzLSM3JyVcozy/KSVEEAB0JBF4=" auto
 
 Enjoy and happy threat hunting!
+## License
+MIT License
+
+Copyright © 2025 Craig Plath
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+copies of the Software, and to permit persons to whom the Software is 
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in 
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+THE SOFTWARE.
 ##>
