@@ -1,6 +1,6 @@
 function decodesource ($encodedsource, [string]$mode = 'urldecode', [int]$number, [switch]$save, $outfile, [switch]$help) {# Decode a file or string to screen based on mode, with optional file save.
 
-function usage {Write-Host -f cyan "`nUsage: decodesource `"source string/file`" <auto/base64/deflate/gzip/hex/htmlentity/reverse/unicode/urldecode/quotedprintable/'regex','search','log','artifact','viewer','gzip','forensics','PowerShell','find','security','SOC','cybersecurity'> <number for urldecode iterations> -save <outfile> -help`n"; return}
+function usage {Write-Host -f cyan "`nUsage: decodesource `"source string/file`" <auto/base64/deflate/gzip/hex/htmlentity/reverse/unicode/urldecode/quotedprintable/zlib> <number for urldecode iterations> -save <outfile> -help`n"; return}
 
 if ($help) {# Inline help.
 # Modify fields sent to it with proper word wrapping.
