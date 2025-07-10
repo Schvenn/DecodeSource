@@ -1,6 +1,6 @@
 @{
 RootModule = 'DecodeSource.psm1'
-ModuleVersion = '1.1'
+ModuleVersion = '1.2'
 GUID = 'e4a7b2e2-1234-4a5f-8d10-9f87c1234567'
 Author = 'Schvenn'
 CompanyName = 'Plath Consulting Incorporated'
