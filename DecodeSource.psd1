@@ -11,8 +11,8 @@ CmdletsToExport = @()
 VariablesToExport = @()
 AliasesToExport = @()
 FileList = @('DecodeSource.psm1')
-PrivateData = @{
-PSData = @{Tags = @('base64','decode','deflate','gzip','hex','htmlentity','quotedprintable','unicode','url','urldecode','security','forensics','cybersecurity','SOC')
+
+PrivateData = @{PSData = @{Tags = @('base64','decode','deflate','gzip','hex','htmlentity','quotedprintable','unicode','url','urldecode','security','forensics','cybersecurity','SOC')
 LicenseUri = 'https://github.com/Schvenn/DecodeSource/blob/main/LICENSE'
 ProjectUri = 'https://github.com/Schvenn/DecodeSource'
 ReleaseNotes = 'Initial PowerShell gallery release. Module for local multi-method text decoding, no dependencies, keeps data secure by keeping it offline.'}}}
